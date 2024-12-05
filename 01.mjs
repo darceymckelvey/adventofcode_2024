@@ -30,27 +30,27 @@ import fs from "fs";
 let left_list = [];
 let right_list = [];
 
-const file_input = fs.readFileSync('./puzzle_input.txt', 'utf-8').split("\n");
+const file_input = fs.readFileSync("./puzzle_input.txt", "utf-8").split("\n");
 
 // console.log(file_input);
 
 const puzzle_input = file_input
-    .map(line => line.trim()) // removes extra spaces and blanks
-    .filter(line => line.length > 0) // ignore empty lines
-    .map(line => {
-        const numbers = line.split(/\s+/).map(str => parseInt(str, 10));
-        // console.log(numbers);
-        return numbers;
-    }) // split by space and covert to integers
-    .filter(numbers => numbers.length === 2); // ensure each line has exactly two numbers
-    
+  .map((line) => line.trim()) // removes extra spaces and blanks
+  .filter((line) => line.length > 0) // ignore empty lines
+  .map((line) => {
+    const numbers = line.split(/\s+/).map((str) => parseInt(str, 10));
+    // console.log(numbers);
+    return numbers;
+  }) // split by space and covert to integers
+  .filter((numbers) => numbers.length === 2); // ensure each line has exactly two numbers
+
 // console.log("Cleaned puzzle input:", puzzle_input);
 
 puzzle_input.forEach(([left, right]) => {
-    if (!isNaN(left) && !isNaN(right)) {
-        left_list.push(left);
-        right_list.push(right);
-    }
+  if (!isNaN(left) && !isNaN(right)) {
+    left_list.push(left);
+    right_list.push(right);
+  }
 });
 
 left_list.sort();
@@ -62,14 +62,16 @@ right_list.sort();
 let total_distance = [];
 
 function total_distance_array(left_list, right_list) {
-    for (let i = 0; i < left_list.length; i++) {
-        let distance = left_list[i] - right_list[i];
-        total_distance.push(Math.abs(distance));
-    }
-    return console.log(total_distance.reduce((partial_sum, a) => partial_sum + a, 0));
+  for (let i = 0; i < left_list.length; i++) {
+    let distance = left_list[i] - right_list[i];
+    total_distance.push(Math.abs(distance));
+  }
+  total_distance = total_distance.reduce(
+    (partial_sum, a) => partial_sum + a,
+    0
+  );
+  return total_distance;
 }
-
-total_distance_array(left_list, right_list);
 
 // --- Part Two ---
 // Your analysis only confirmed what everyone feared: the two lists of location IDs are indeed very different.
@@ -92,3 +94,41 @@ total_distance_array(left_list, right_list);
 //     The last number, 3, appears in the right list three times; the similarity score again increases by 9.
 // So, for these example lists, the similarity score at the end of this process is 31 (9 + 4 + 0 + 0 + 9 + 9).
 // Once again consider your left and right lists. What is their similarity score?
+
+total_distance_array(left_list, right_list);
+console.log(total_distance);
+
+let value;
+
+function occurrence(right_list, value) {
+  return right_list.filter((v) => v === value).length;
+}
+
+const occurrence_array = [];
+
+for (let i = 0; i < left_list.length; i++) {
+  value = left_list[i];
+  const occurrenceCount = occurrence(right_list, value);
+  // console.log(occurrence(right_list, value));
+  occurrence_array.push([value, occurrenceCount]);
+}
+
+const occurrence_array_filtered = occurrence_array.filter(
+  (item) => item[1] !== 0
+);
+
+console.log(occurrence_array_filtered);
+
+let times_amount = 0;
+let total = 0;
+
+const times_occurrence_amount = () => {
+  for (let i = 0; i < occurrence_array_filtered.length; i++) {
+    times_amount =
+      occurrence_array_filtered[i][0] * occurrence_array_filtered[i][1];
+    total += times_amount;
+  }
+  return total;
+};
+
+console.log(times_occurrence_amount());
