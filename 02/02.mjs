@@ -23,10 +23,76 @@
 // So, in this example, 2 reports are safe.
 // Analyze the unusual data from the engineers. How many reports are safe?
 
-import fs from "fs";
+import fs from 'node:fs';
+import readline from 'node:readline';
 
-const file_input = fs.readFileSync("./reports.txt", "utf-8").split("\n");
+let safe = [];
 
-console.log(file_input);
+async function processLineByLine() {
+    const fileStream = fs.createReadStream('./reports.txt');
+    const rl = readline.createInterface({
+        input: fileStream,
+        output: Infinity,
+    });
 
-// how many levels does each report line have?
+    let allReports = [];
+
+    for await (const line of rl) {;
+        let toBase10 = line.split(/\s+/).map((str) => parseInt(str, 10));
+        allReports.push(toBase10);
+    }  
+
+    return allReports;
+}
+
+function isSafe(report) {
+    let increasing = null;
+
+    for (let i = 0; i < report.length - 1; i++) {
+        let diff = Math.abs(report[i + 1] - report[i]);
+
+        if (diff < 1 || diff > 3) {
+            return false;
+        }
+
+        if (report[i + 1] > report[i]) {
+            if (increasing === null) {
+                increasing = true;
+            } else if (increasing === false) {
+                return false;
+            }
+        } else if (report[i + 1] < report[i]) {
+            if (increasing === null) {
+                increasing = false;
+            } else if (increasing === true) {
+                return false; 
+            }
+        }
+    }
+
+        return true;
+    }
+
+processLineByLine().then((allReports) => {
+    allReports.forEach((report) => {
+        if (isSafe(report)) {
+            safe.push(report);
+        }
+    });
+
+    console.log(`Safe reports counts: ${safe.length}`);
+});
+
+// --- Part Two ---
+// The engineers are surprised by the low number of safe reports until they realize they forgot to tell you about the Problem Dampener.
+// The Problem Dampener is a reactor-mounted module that lets the reactor safety systems tolerate a single bad level in what would otherwise be a safe report. It's like the bad level never happened!
+// Now, the same rules apply as before, except if removing a single level from an unsafe report would make it safe, the report instead counts as safe.
+// More of the above example's reports are now safe:
+//     7 6 4 2 1: Safe without removing any level.
+//     1 2 7 8 9: Unsafe regardless of which level is removed.
+//     9 7 6 2 1: Unsafe regardless of which level is removed.
+//     1 3 2 4 5: Safe by removing the second level, 3.
+//     8 6 4 4 1: Safe by removing the third level, 4.
+//     1 3 6 7 9: Safe without removing any level.
+// Thanks to the Problem Dampener, 4 reports are actually safe!
+// Update your analysis by handling situations where the Problem Dampener can remove a single level from unsafe reports. How many reports are now safe?
